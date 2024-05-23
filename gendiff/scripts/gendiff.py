@@ -1,26 +1,14 @@
-def make_description():
-    description = """
-    gendiff -h
-    usage: gendiff [-h] first_file second_file
-    
-    Compares two configuration files and shows a difference.
-    
-    positional arguments:
-        first_file
-        second_file
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    """
-    print(description)
+import argparse
 
 
 def main():
+    parser = argparse.AgrumentParser(prog='gendiff', description = 'Compares two configuration files and shows a difference')
+    parser.add_argument('first_file')
+    parser.add_argument('second_file')
 
+    args = parser.parse_args()
 
-
-
-
+    print(f'Comparing files: {args.first_file} and {args.second_file}')
 
 
 if __name__ == '__main__':
