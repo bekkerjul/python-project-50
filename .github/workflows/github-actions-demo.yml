@@ -26,7 +26,7 @@ jobs:
         run: poetry run pytest tests/test_gendiff.py
 
       - name: Run tests with coverage
-        run: poetry run pytest tests/tests_gendiff.py --cov=gendiff --cov-report=xml --cov-report=term
+        run: poetry run pytest tests/test_gendiff.py --cov=gendiff --cov-report=xml --cov-report=term
 
       - name: List coverage file
         run: ls -l coverage.xml
