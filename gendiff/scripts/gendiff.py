@@ -17,11 +17,14 @@ def generate_diff(path1, path2):
     for key in sorted(all_keys):
         if key in data1 and key in data2:
             if data1[key] != data2[key]:
-                diff[key] = {'first_file': data1[key], 'second_file': data2[key]}
+                diff[key] = {'first_file': data1[key],
+                             'second_file': data2[key]}
             else:
-                diff[key] = {'first_file': data1[key], 'second_file': data2[key], 'unchanged': True}
+                diff[key] = {'first_file': data1[key],
+                             'second_file': data2[key], 'unchanged': True}
         elif key in data1:
-            diff[key] = {'first_file': data1[key], 'second_file': None}
+            diff[key] = {'first_file': data1[key],
+                         'second_file': None}
         else:
             diff[key] = {'first_file': None, 'second_file': data2[key]}
 
@@ -40,10 +43,14 @@ def generate_diff(path1, path2):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='gendiff', description='Compares two configuration files and shows a difference')
+    parser = argparse.ArgumentParser(prog='gendiff',
+                                     description=
+                                     f'Compares two configuration files '
+                                     f'and shows a difference')
     parser.add_argument('first_file')
     parser.add_argument('second_file')
-    parser.add_argument('-f', '--format', help='set format of output', default='default')
+    parser.add_argument('-f', '--format',
+                        help='set format of output', default='default')
 
     args = parser.parse_args()
 
