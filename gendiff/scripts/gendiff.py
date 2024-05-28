@@ -7,11 +7,13 @@ def load_json(path):
     with open(path) as file:
         return json.load(file)
 
+
 def compare_keys(data1, data2):
     keys1 = set(data1.keys())
     keys2 = set(data2.keys())
     all_keys = keys1 | keys2
     return all_keys
+
 
 def format_diff(diff):
     diff_str = '{\n'
@@ -25,6 +27,7 @@ def format_diff(diff):
                 diff_str += f'  + {key}: {value["second_file"]}\n'
     diff_str += '}'
     return diff_str
+
 
 def generate_diff(path1, path2):
     data1 = load_json(path1)
