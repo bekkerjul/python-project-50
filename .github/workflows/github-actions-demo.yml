@@ -26,7 +26,7 @@ jobs:
         run: poetry run pytest tests/tests_gendiff.py
 
       - name: Run tests with coverage
-        run: poetry run pytest --cov=gendiff --cov-report=xml
+        run: poetry run pytest tests/tests_gendiff.py --cov=gendiff --cov-report=term
 
       - name: Install CodeClimate test reporter
         run: |
