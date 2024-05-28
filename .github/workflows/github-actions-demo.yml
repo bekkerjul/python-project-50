@@ -23,7 +23,7 @@ jobs:
         run: poetry run flake8 gendiff
 
       - name: Run tests
-        run: poetry run pytest tests/tests_gendiff.py
+        run: poetry run pytest tests/test_gendiff.py
 
       - name: Run tests with coverage
         run: poetry run pytest tests/tests_gendiff.py --cov=gendiff --cov-report=xml --cov-report=term
