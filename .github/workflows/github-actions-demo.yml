@@ -23,4 +23,4 @@ jobs:
         run: poetry run flake8 gendiff
 
       - name: Run tests
-        run: poetry run pytest
+        run: poetry run pytest tests/tests_gendiff.py
