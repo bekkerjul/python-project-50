@@ -67,7 +67,7 @@ def main():
 
     print(f'gendiff {args.first_file} {args.second_file}')
     diff_result = generate_diff(args.first_file, args.second_file)
-    print(diff_result)
+    print(diff_result )
 
 
 if __name__ == '__main__':
