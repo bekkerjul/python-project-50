@@ -8,8 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
+      - name: Install dependencies
+        run: poetry install
+
       - name: Lint with flake8
-        run: flake8 gendiff
+        run: poetry run flake8 gendiff
 
       - name: Run tests
-        run: pytest
+        run: poetry run pytest
