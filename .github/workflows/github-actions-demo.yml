@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Lint with flake8
-        run: poetry run flake8 gendiff
+        run: flake8 gendiff
 
       - name: Run tests
         run: pytest
