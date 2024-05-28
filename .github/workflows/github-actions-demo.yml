@@ -38,5 +38,5 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           ./cc-test-reporter before-build
-          ./cc-test-reporter format-coverage --input-type pytest ./coverage.xml
+          ./cc-test-reporter format-coverage --input-type coverage.py
           ./cc-test-reporter upload-coverage
