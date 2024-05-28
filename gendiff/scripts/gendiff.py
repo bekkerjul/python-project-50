@@ -5,7 +5,8 @@ import json
 
 def load_json(path):
     with open(path) as file:
-        return json.load(file)
+        data = json.load(file)
+    return data
 
 
 def compare_keys(data1, data2):
