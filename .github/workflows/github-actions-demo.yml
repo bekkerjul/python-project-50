@@ -26,7 +26,10 @@ jobs:
         run: poetry run pytest tests/tests_gendiff.py
 
       - name: Run tests with coverage
-        run: poetry run pytest tests/tests_gendiff.py --cov=gendiff --cov-report=term
+        run: poetry run pytest tests/tests_gendiff.py --cov=gendiff --cov-report=xml --cov-report=term
+
+      - name: List coverage file
+        run: ls -l coverage.xml
 
       - name: Install CodeClimate test reporter
         run: |
@@ -38,5 +41,5 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           ./cc-test-reporter before-build
-          ./cc-test-reporter format-coverage --input-type coverage.py
+          ./cc-test-reporter format-coverage coverage.xml --input-type coverage.py
           ./cc-test-reporter upload-coverage
