@@ -24,3 +24,19 @@ jobs:
 
       - name: Run tests
         run: poetry run pytest tests/tests_gendiff.py
+
+      - name: Run tests with coverage
+        run: poetry run pytest --cov=gendiff --cov-report=xml
+
+      - name: Install CodeClimate test reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
+
+      - name: Report coverage to CodeClimate
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          ./cc-test-reporter before-build
+          ./cc-test-reporter format-coverage --input-type pytest ./coverage.xml
+          ./cc-test-reporter upload-coverage
