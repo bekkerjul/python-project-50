@@ -5,3 +5,4 @@
 ![Github Actions](https://github.com/bekkerjul/python-project-50/actions/workflows/github-actions-demo.yml/badge.svg)
 ### Asciinems
 <a href="https://asciinema.org/a/eR4Bd0UEq1LpZMSovpBsClgnn" target="_blank"><img src="https://asciinema.org/a/eR4Bd0UEq1LpZMSovpBsClgnn.svg" /></a>
+<a href="https://asciinema.org/a/QDhZaY7AzeSx9vIsT1QTQ5neX" target="_blank"><img src="https://asciinema.org/a/QDhZaY7AzeSx9vIsT1QTQ5neX.svg" /></a>
