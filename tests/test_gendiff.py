@@ -2,6 +2,7 @@ from gendiff.scripts.gendiff import load_json, compare_keys, format_diff, genera
 
 path1 = 'tests/fixtures/file1.json'
 path2 = 'tests/fixtures/file2.json'
+path3 = 'tests/fixtures/file1.yaml'
 data1 = {
         'host': 'hexlet.io',
         'timeout': 50,
@@ -24,6 +25,8 @@ diff = {
 def test_load_json():
     assert load_json(path1) == data1
 
+def test_load_yaml():
+    assert load_yaml(path3) == data1
 
 def test_compare_keys():
     assert compare_keys(data1, data2) == {'host', 'timeout', 'proxy', 'follow', 'verbose'}
