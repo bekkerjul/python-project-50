@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-import argparse
 import json
+import yaml
+
+from gendiff.parser import make_parser
 
 
-def load_json(path):
+def load_format(path, format_method):
     with open(path) as file:
-        data = json.load(file)
+        data = format_method(file)
     return data
 
 
@@ -30,9 +32,17 @@ def format_diff(diff):
     return diff_str
 
 
+def define_format(path):
+    if 'json' in path:
+        make_format = json.load
+    elif 'yaml' or 'yml' in path:
+        make_format = yaml.safe_load
+    return make_format
+
+
 def generate_diff(path1, path2):
-    data1 = load_json(path1)
-    data2 = load_json(path2)
+    data1 = load_format(path1, define_format(path1))
+    data2 = load_format(path2, define_format(path2))
 
     diff = {}
     all_keys = compare_keys(data1, data2)
@@ -55,20 +65,7 @@ def generate_diff(path1, path2):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='gendiff',
-                                     description='Compares two'
-                                                 'configuration files '
-                                                 'and shows a difference')
-    parser.add_argument('first_file')
-    parser.add_argument('second_file')
-    parser.add_argument('-f', '--format',
-                        help='set format of output', default='default')
-
-    args = parser.parse_args()
-
-    print(f'gendiff {args.first_file} {args.second_file}')
-    diff_result = generate_diff(args.first_file, args.second_file)
-    print(diff_result)
+    make_parser(generate_diff)
 
 
 if __name__ == '__main__':
