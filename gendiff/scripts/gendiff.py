@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json
 import yaml
 
@@ -11,25 +10,21 @@ def load_format(path, format_method):
     return data
 
 
+def find_keys_tree(tree, tree_keys=None):
+    if tree_keys is None:
+        tree_keys = set()
+    for key in tree:
+        if isinstance(tree[key], dict):
+            find_keys_tree(tree[key], tree_keys)
+        tree_keys.add(key)
+    return tree_keys
+
+
 def compare_keys(data1, data2):
-    keys1 = set(data1.keys())
-    keys2 = set(data2.keys())
+    keys1 = find_keys_tree(data1)
+    keys2 = find_keys_tree(data2)
     all_keys = keys1 | keys2
     return all_keys
-
-
-def format_diff(diff):
-    diff_str = '{\n'
-    for key, value in sorted(diff.items()):
-        if value.get('unchanged'):
-            diff_str += f'    {key}: {value["first_file"]}\n'
-        else:
-            if value['first_file'] is not None:
-                diff_str += f'  - {key}: {value["first_file"]}\n'
-            if value['second_file'] is not None:
-                diff_str += f'  + {key}: {value["second_file"]}\n'
-    diff_str += '}'
-    return diff_str
 
 
 def define_format(path):
@@ -40,27 +35,54 @@ def define_format(path):
     return make_format
 
 
+def format_diff(diff, depth=1):
+    diff_str = '{\n'
+    for key, val in sorted(diff.items()):
+        if isinstance(val, dict):
+            depth += 1
+            format_diff(val, depth)
+
+        if val.get('unchanged'):
+            diff_str += f'{"    " * depth}{key}: {val["first_file"]}\n'
+        else:
+            if val['first_file'] is not None:
+                diff_str += f'{"  " * depth}- {key}: {val["first_file"]}\n'
+            if val['second_file'] is not None:
+                diff_str += f'{"  " * depth}+ {key}: {val["second_file"]}\n'
+            diff_str += '}'
+    return diff_str
+
+
+
+
+
+def generate_diff_tree(data1, data2):
+    diff = {}
+    all_keys = set(data1.keys()).union(data2.keys())
+
+    for key in sorted(all_keys):
+        val1 = data1.get(key)
+        val2 = data2.get(key)
+
+        if isinstance(val1, dict) and isinstance(val2, dict):
+            diff[key] = generate_diff_tree(val1, val2)
+        elif isinstance(val1, dict):
+            diff[key] = {'first_file': val1, 'second_file': None}
+        elif isinstance(val2, dict):
+            diff[key] = {'first_file': None, 'second_file': val2}
+        elif val1 != val2:
+            diff[key] = {'first_file': val1, 'second_file': val2}
+        else:
+            diff[key] = {'first_file': val1, 'second_file': val2, 'unchanged': True}
+
+    return diff
+
+
 def generate_diff(path1, path2):
     data1 = load_format(path1, define_format(path1))
     data2 = load_format(path2, define_format(path2))
 
-    diff = {}
-    all_keys = compare_keys(data1, data2)
-
-    for key in sorted(all_keys):
-        if key in data1 and key in data2:
-            if data1[key] != data2[key]:
-                diff[key] = {'first_file': data1[key],
-                             'second_file': data2[key]}
-            else:
-                diff[key] = {'first_file': data1[key],
-                             'second_file': data2[key], 'unchanged': True}
-        elif key in data1:
-            diff[key] = {'first_file': data1[key],
-                         'second_file': None}
-        else:
-            diff[key] = {'first_file': None, 'second_file': data2[key]}
-
+    diff = generate_diff_tree(data1, data2)
     return format_diff(diff)
 
 
