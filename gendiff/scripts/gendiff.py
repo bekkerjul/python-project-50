@@ -37,12 +37,12 @@ def define_format(path):
 
 def format_diff(diff, depth=1):
     diff_str = '{\n'
-    for key, val in sorted(diff.items()):
+    for key, val in diff.items():
         if isinstance(val, dict):
             depth += 1
             format_diff(val, depth)
 
-        if val.get('unchanged'):
+        if val and val.get('unchanged'):
             diff_str += f'{"    " * depth}{key}: {val["first_file"]}\n'
         else:
             if val['first_file'] is not None:
@@ -53,12 +53,9 @@ def format_diff(diff, depth=1):
     return diff_str
 
 
-
-
-
 def generate_diff_tree(data1, data2):
     diff = {}
-    all_keys = set(data1.keys()).union(data2.keys())
+    all_keys = compare_keys(data1, data2)
 
     for key in sorted(all_keys):
         val1 = data1.get(key)
