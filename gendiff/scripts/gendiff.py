@@ -1,7 +1,7 @@
 import json
 import yaml
 
-from gendiff.parser import make_parser
+#from gendiff.parser import make_parser
 
 
 def load_format(path, format_method):
@@ -10,12 +10,9 @@ def load_format(path, format_method):
     return data
 
 
-def find_keys_tree(tree, tree_keys=None):
-    if tree_keys is None:
-        tree_keys = set()
+def find_keys_tree(tree):
+    tree_keys = set()
     for key in tree:
-        if isinstance(tree[key], dict):
-            find_keys_tree(tree[key], tree_keys)
         tree_keys.add(key)
     return tree_keys
 
@@ -24,7 +21,7 @@ def compare_keys(data1, data2):
     keys1 = find_keys_tree(data1)
     keys2 = find_keys_tree(data2)
     all_keys = keys1 | keys2
-    return all_keys
+    return sorted(all_keys)
 
 
 def define_format(path):
@@ -36,42 +33,57 @@ def define_format(path):
 
 
 def format_diff(diff, depth=1):
-    diff_str = '{\n'
-    for key, val in diff.items():
-        if isinstance(val, dict):
-            depth += 1
-            format_diff(val, depth)
+    diff_str = ''
+    indent = ' ' * depth
 
-        if val and val.get('unchanged'):
-            diff_str += f'{"    " * depth}{key}: {val["first_file"]}\n'
+    for key, val in diff.items():
+        if val['type'] == 'nested':
+            diff_str += f'{indent}{key}: {{\n'
+            diff_str += format_diff(val['first_file'], depth + 1)
+            diff_str += f'{indent}}}\n'
+        elif val['type'] == 'added':
+            diff_str += f'{indent}+ {key}: {val["second_file"]}\n'
+        elif val['type'] == 'removed':
+            diff_str += f'{indent}+ {key}: {val["first_file"]}\n'
+        elif val['type'] == 'changed':
+            diff_str += f'{indent}- {key}: {val["first_file"]}\n'
+            diff_str += f'{indent}+ {key}: {val["second_file"]}\n'
         else:
-            if val['first_file'] is not None:
-                diff_str += f'{"  " * depth}- {key}: {val["first_file"]}\n'
-            if val['second_file'] is not None:
-                diff_str += f'{"  " * depth}+ {key}: {val["second_file"]}\n'
-            diff_str += '}'
+            diff_str += f'{indent}  {key}: {val["first_file"]}\n'
     return diff_str
 
+"""depth += 1
+            diff_str += '{\n'
+            format_diff(val['first_file'], depth, diff_str)
+        if val['type'] == 'added':
+            diff_str += f'{"  " * (depth - 2)}- {key}: {val["first_file"]}\n'
+        elif val['type'] == 'removed':
+            diff_str += f'{"  " * (depth - 2)}+ {key}: {val["second_file"]}\n'
+        elif val['type'] == 'changed':
+            diff_str += f'{"  " * (depth - 2)}- {key}: {val["first_file"]}\n'
+            diff_str += f'{"  " * (depth - 2)}+ {key}: {val["second_file"]}\n'
+        else:
+            diff_str += f'{"  " * depth}{key}: {val["first_file"]}\n'
+    return diff_str"""
 
-def generate_diff_tree(data1, data2):
-    diff = {}
+
+def generate_diff_tree(data1, data2, diff={}):
     all_keys = compare_keys(data1, data2)
 
-    for key in sorted(all_keys):
-        val1 = data1.get(key)
-        val2 = data2.get(key)
-
-        if isinstance(val1, dict) and isinstance(val2, dict):
-            diff[key] = generate_diff_tree(val1, val2)
-        elif isinstance(val1, dict):
-            diff[key] = {'first_file': val1, 'second_file': None}
-        elif isinstance(val2, dict):
-            diff[key] = {'first_file': None, 'second_file': val2}
+    for key in all_keys:
+        val1 = data1[key] if isinstance(data1, dict) and key in data1 else None
+        val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
+        if key in data1 and key in data2 and isinstance(val1, dict):
+            #diff[key] = {key: generate_diff_tree(val1,val2, diff), 'type': 'nested'}
+            pass
+        elif key in data1 and key not in data2:
+            diff[key] = {'type': 'added', 'value': val1}
+        elif key not in data1 and key in data2:
+            diff[key] = {'type': 'removed', 'value': val2}
         elif val1 != val2:
-            diff[key] = {'first_file': val1, 'second_file': val2}
-        else:
-            diff[key] = {'first_file': val1, 'second_file': val2, 'unchanged': True}
-
+            diff[key] = {'first_file': val1, 'second_file': val2, 'type': 'changed'}
+        elif val1 == val2 and key in data1 and key in data2:
+            diff[key] = {'first_file': val1, 'second_file': val2, 'type': 'unchanged'}
     return diff
 
 
@@ -83,9 +95,17 @@ def generate_diff(path1, path2):
     return format_diff(diff)
 
 
-def main():
+"""def main():
     make_parser(generate_diff)
 
 
 if __name__ == '__main__':
     main()
+"""
+path1 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file3.yaml'
+path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file4.yml'
+data1 = load_format(path1, yaml.safe_load)
+data2 = load_format(path2, yaml.safe_load)
+#diff = generate_diff_tree(data1, data2)
+#print(format_diff(diff))
+print(generate_diff_tree(data1, data2))
