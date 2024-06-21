@@ -33,24 +33,27 @@ def define_format(path):
 
 
 def format_diff(diff, depth=1):
-    diff_str = ''
-    indent = ' ' * depth
+    diff_str = '{\n'
+    indent = '    ' * depth
 
-    for key, val in diff.items():
-        if val['type'] == 'nested':
-            diff_str += f'{indent}{key}: {{\n'
-            diff_str += format_diff(val['first_file'], depth + 1)
-            diff_str += f'{indent}}}\n'
-        elif val['type'] == 'added':
-            diff_str += f'{indent}+ {key}: {val["second_file"]}\n'
-        elif val['type'] == 'removed':
-            diff_str += f'{indent}+ {key}: {val["first_file"]}\n'
-        elif val['type'] == 'changed':
-            diff_str += f'{indent}- {key}: {val["first_file"]}\n'
-            diff_str += f'{indent}+ {key}: {val["second_file"]}\n'
-        else:
-            diff_str += f'{indent}  {key}: {val["first_file"]}\n'
-    return diff_str
+
+"""   for key, val in diff.items():
+     if isinstance(val, dict) and key != 'type':
+         format_diff(val, depth+1)
+
+     if val['type'] == 'added':
+         diff_str += f'{indent}+ {key}: {val["value"]}\n'
+     elif val['type'] == 'removed':
+         diff_str += f'{indent}+ {key}: {val["value"]}\n'
+     elif val['type'] == 'changed':
+         diff_str += f'{indent}- {key}: {val["value"]}\n'
+         diff_str += f'{indent}+ {key}: {val["value"]}\n'
+     else:
+         diff_str += f'{indent}  {key}: {val["value"]}\n'
+ return diff_str"""
+
+
+
 
 """depth += 1
             diff_str += '{\n'
@@ -73,6 +76,28 @@ def generate_diff_tree(data1, data2, diff={}):
     for key in all_keys:
         val1 = data1[key] if isinstance(data1, dict) and key in data1 else None
         val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
+
+        if key in data1 and key in data2 and isinstance(val1, dict):
+            if val1 == val2:
+                diff[key] = {'type': 'unchanged'}
+            else:
+                diff[key] = {'type': 'changed'}
+            generate_diff_tree(val1, val2, diff[key])
+        elif key not in data1 and key in data2:
+            diff[key] = {'type': 'added', 'value': val2}
+        elif key in data1 and key not in data2:
+            diff[key] = {'type': 'removed', 'value': val1}
+        elif val1 != val2:
+            diff[key] = {'type': 'changed', 'value': [val1, val2]}
+        elif val1 == val2 and key in data1 and key in data2:
+            diff[key] = {'type': 'unchanged', 'value': val1}
+    return diff
+
+
+
+"""    for key in all_keys:
+        val1 = data1[key] if isinstance(data1, dict) and key in data1 else None
+        val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
         if key in data1 and key in data2 and isinstance(val1, dict):
             #diff[key] = {key: generate_diff_tree(val1,val2, diff), 'type': 'nested'}
             pass
@@ -85,7 +110,7 @@ def generate_diff_tree(data1, data2, diff={}):
         elif val1 == val2 and key in data1 and key in data2:
             diff[key] = {'first_file': val1, 'second_file': val2, 'type': 'unchanged'}
     return diff
-
+"""
 
 def generate_diff(path1, path2):
     data1 = load_format(path1, define_format(path1))
@@ -106,6 +131,6 @@ path1 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file3.yaml'
 path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file4.yml'
 data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
-#diff = generate_diff_tree(data1, data2)
-#print(format_diff(diff))
-print(generate_diff_tree(data1, data2))
+#print(generate_diff(path1, path2))
+diff = (generate_diff_tree(data1 , data2))
+print(diff)
