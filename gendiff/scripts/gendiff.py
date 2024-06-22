@@ -78,10 +78,7 @@ def generate_diff_tree(data1, data2, diff={}):
         val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
 
         if key in data1 and key in data2 and isinstance(val1, dict):
-            if val1 == val2:
-                diff[key] = {'type': 'unchanged'}
-            else:
-                diff[key] = {'type': 'changed'}
+            diff[key] = {'type': 'nested'}
             generate_diff_tree(val1, val2, diff[key])
         elif key not in data1 and key in data2:
             diff[key] = {'type': 'added', 'value': val2}
