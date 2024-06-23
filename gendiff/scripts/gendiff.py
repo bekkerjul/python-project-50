@@ -12,15 +12,21 @@ def load_format(path, format_method):
 
 def find_keys_tree(tree):
     tree_keys = set()
-    for key in tree:
-        tree_keys.add(key)
-    return tree_keys
+    if isinstance(tree, dict):
+        for key in tree:
+            tree_keys.add(key)
+        return tree_keys if tree_keys else None
 
 
 def compare_keys(data1, data2):
     keys1 = find_keys_tree(data1)
     keys2 = find_keys_tree(data2)
-    all_keys = keys1 | keys2
+    if keys1 and keys2:
+        all_keys = keys1 | keys2
+    elif keys1:
+        all_keys = keys1
+    else:
+        all_keys = keys2
     return sorted(all_keys)
 
 
@@ -70,7 +76,8 @@ def format_diff(diff, depth=1):
     return diff_str"""
 
 
-def generate_diff_tree(data1, data2, diff={}):
+def generate_diff_tree(data1, data2):
+    diff = {}
     all_keys = compare_keys(data1, data2)
 
     for key in all_keys:
@@ -78,8 +85,7 @@ def generate_diff_tree(data1, data2, diff={}):
         val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
 
         if key in data1 and key in data2 and isinstance(val1, dict):
-            diff[key] = {'type': 'nested'}
-            generate_diff_tree(val1, val2, diff[key])
+            diff[key] = {'type': 'nested', 'value': generate_diff_tree(val1, val2)}
         elif key not in data1 and key in data2:
             diff[key] = {'type': 'added', 'value': val2}
         elif key in data1 and key not in data2:
@@ -129,5 +135,5 @@ path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file4.yml'
 data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
 #print(generate_diff(path1, path2))
-diff = (generate_diff_tree(data1 , data2))
+diff = (generate_diff_tree(data1, data2))
 print(diff)
