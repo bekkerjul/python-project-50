@@ -84,36 +84,18 @@ def generate_diff_tree(data1, data2):
         val1 = data1[key] if isinstance(data1, dict) and key in data1 else None
         val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
 
-        if key in data1 and key in data2 and isinstance(val1, dict):
-            diff[key] = {'type': 'nested', 'value': generate_diff_tree(val1, val2)}
-        elif key not in data1 and key in data2:
-            diff[key] = {'type': 'added', 'value': val2}
-        elif key in data1 and key not in data2:
+        if key in data1 and key not in data2:
             diff[key] = {'type': 'removed', 'value': val1}
-        elif val1 != val2:
-            diff[key] = {'type': 'changed', 'value': [val1, val2]}
-        elif val1 == val2 and key in data1 and key in data2:
+        elif  key in data2 and key not in data1:
+            diff[key] = {'type': 'added', 'value': val2}
+        elif val1 == val2:
             diff[key] = {'type': 'unchanged', 'value': val1}
+        elif isinstance(val1, dict) and isinstance(val2, dict):
+            diff[key] = {'type': 'nested', 'value': generate_diff_tree(val1, val2)}
+        else:
+            diff[key] = {'type': 'changed', 'value': [val1, val2]}
     return diff
 
-
-
-"""    for key in all_keys:
-        val1 = data1[key] if isinstance(data1, dict) and key in data1 else None
-        val2 = data2[key] if isinstance(data2, dict) and key in data2 else None
-        if key in data1 and key in data2 and isinstance(val1, dict):
-            #diff[key] = {key: generate_diff_tree(val1,val2, diff), 'type': 'nested'}
-            pass
-        elif key in data1 and key not in data2:
-            diff[key] = {'type': 'added', 'value': val1}
-        elif key not in data1 and key in data2:
-            diff[key] = {'type': 'removed', 'value': val2}
-        elif val1 != val2:
-            diff[key] = {'first_file': val1, 'second_file': val2, 'type': 'changed'}
-        elif val1 == val2 and key in data1 and key in data2:
-            diff[key] = {'first_file': val1, 'second_file': val2, 'type': 'unchanged'}
-    return diff
-"""
 
 def generate_diff(path1, path2):
     data1 = load_format(path1, define_format(path1))
