@@ -140,3 +140,4 @@ data2 = load_format(path2, yaml.safe_load)
 diff = (generate_diff_tree(data1, data2))
 #print(format_diff(diff))
 print(diff)
+
