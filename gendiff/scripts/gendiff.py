@@ -38,12 +38,32 @@ def define_format(path):
     return make_format
 
 
-def format_diff(diff, depth=1):
-    diff_str = '{\n'
+def format_diff(diff, depth=0, diff_str=''):
     indent = '    ' * depth
+    diff_str += f'{indent}{{\n'
+    for key, val in diff.items():
+        if val['value'] == 'removed':
+            diff_str += f'{indent}  - {key}: {val["value"]}\n'
+        elif val['value'] == 'added':
+            diff_str += f'{indent}  + {key}: {val["value"]}\n'
+        elif val['value'] == 'unchanged':
+            diff_str += f'{indent}    {key}: {val["value"]}\n'
+        elif
+        print(diff_str)
 
 
-"""   for key, val in diff.items():
+
+
+
+
+
+
+
+
+
+
+"""
+   for key, val in diff.items():
      if isinstance(val, dict) and key != 'type':
          format_diff(val, depth+1)
 
@@ -56,12 +76,12 @@ def format_diff(diff, depth=1):
          diff_str += f'{indent}+ {key}: {val["value"]}\n'
      else:
          diff_str += f'{indent}  {key}: {val["value"]}\n'
- return diff_str"""
+ return diff_str
 
 
 
 
-"""depth += 1
+depth += 1
             diff_str += '{\n'
             format_diff(val['first_file'], depth, diff_str)
         if val['type'] == 'added':
@@ -73,8 +93,8 @@ def format_diff(diff, depth=1):
             diff_str += f'{"  " * (depth - 2)}+ {key}: {val["second_file"]}\n'
         else:
             diff_str += f'{"  " * depth}{key}: {val["first_file"]}\n'
-    return diff_str"""
-
+    return diff_str
+"""
 
 def generate_diff_tree(data1, data2):
     diff = {}
@@ -86,7 +106,7 @@ def generate_diff_tree(data1, data2):
 
         if key in data1 and key not in data2:
             diff[key] = {'type': 'removed', 'value': val1}
-        elif  key in data2 and key not in data1:
+        elif key in data2 and key not in data1:
             diff[key] = {'type': 'added', 'value': val2}
         elif val1 == val2:
             diff[key] = {'type': 'unchanged', 'value': val1}
@@ -104,8 +124,8 @@ def generate_diff(path1, path2):
     diff = generate_diff_tree(data1, data2)
     return format_diff(diff)
 
-
-"""def main():
+"""
+def main():
     make_parser(generate_diff)
 
 
@@ -118,4 +138,5 @@ data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
 #print(generate_diff(path1, path2))
 diff = (generate_diff_tree(data1, data2))
+#print(format_diff(diff))
 print(diff)
