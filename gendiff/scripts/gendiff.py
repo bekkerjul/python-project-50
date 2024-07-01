@@ -38,18 +38,21 @@ def define_format(path):
     return make_format
 
 
-def format_diff(diff, depth=0, diff_str=''):
+def format_diff(diff, depth=0, diff_str='{\n'):
     indent = '    ' * depth
-    diff_str += f'{indent}{{\n'
     for key, val in diff.items():
-        if val['value'] == 'removed':
+        if val['type'] == 'removed':
             diff_str += f'{indent}  - {key}: {val["value"]}\n'
-        elif val['value'] == 'added':
+        elif val['type'] == 'added':
             diff_str += f'{indent}  + {key}: {val["value"]}\n'
-        elif val['value'] == 'unchanged':
+        elif val['type'] == 'unchanged':
             diff_str += f'{indent}    {key}: {val["value"]}\n'
-        elif
-        print(diff_str)
+        elif val['type'] == 'nested':
+            diff_str += f'{indent}    {key}: {format_diff(val["value"], depth + 1, diff_str)}\n'
+        else:
+            diff_str += f'{indent}  - {key}: {val["value"][0]}\n'
+            diff_str += f'{indent}  + {key}: {val["value"][1]}\n'
+    return diff_str
 
 
 
@@ -138,6 +141,6 @@ data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
 #print(generate_diff(path1, path2))
 diff = (generate_diff_tree(data1, data2))
-#print(format_diff(diff))
-print(diff)
+print(format_diff(diff))
+#print(diff)
 
