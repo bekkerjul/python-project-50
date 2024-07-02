@@ -1,7 +1,8 @@
 import json
 import yaml
 
-#from gendiff.parser import make_parser
+
+# from gendiff.parser import make_parser
 
 
 def load_format(path, format_method):
@@ -38,31 +39,32 @@ def define_format(path):
     return make_format
 
 
-def format_diff(diff, depth=0, diff_str='{\n'):
+def stringify_value(key, val, sign, indent):
+    if isinstance(val, dict):
+        key2 = list(val)[0]
+        return (f'{indent}  {sign} {key}: {{\n{indent}        '
+                f'{key2}: {val[key2]}\n{indent}    }}\n ')
+    else:
+        return f'{indent}  {sign} {key}: {val}\n'
+
+
+def format_diff(diff, depth=0):
+    diff_str = '{\n'
     indent = '    ' * depth
     for key, val in diff.items():
         if val['type'] == 'removed':
-            diff_str += f'{indent}  - {key}: {val["value"]}\n'
+            diff_str += f'{stringify_value(key, val["value"], "-", indent)}'
         elif val['type'] == 'added':
-            diff_str += f'{indent}  + {key}: {val["value"]}\n'
+            diff_str += f'{stringify_value(key, val["value"], "+", indent)}'
         elif val['type'] == 'unchanged':
             diff_str += f'{indent}    {key}: {val["value"]}\n'
         elif val['type'] == 'nested':
-            diff_str += f'{indent}    {key}: {format_diff(val["value"], depth + 1, diff_str)}\n'
+            diff_str += f'{indent}    {key}: {format_diff(val["value"], depth + 1)}\n'
         else:
-            diff_str += f'{indent}  - {key}: {val["value"][0]}\n'
-            diff_str += f'{indent}  + {key}: {val["value"][1]}\n'
+            diff_str += f'{stringify_value(key, val["value"][0], "-", indent)}'
+            diff_str += f'{stringify_value(key, val["value"][1], "+", indent)}'
+    diff_str += f'{indent}}}'
     return diff_str
-
-
-
-
-
-
-
-
-
-
 
 
 """
@@ -99,6 +101,7 @@ depth += 1
     return diff_str
 """
 
+
 def generate_diff_tree(data1, data2):
     diff = {}
     all_keys = compare_keys(data1, data2)
@@ -127,6 +130,7 @@ def generate_diff(path1, path2):
     diff = generate_diff_tree(data1, data2)
     return format_diff(diff)
 
+
 """
 def main():
     make_parser(generate_diff)
@@ -139,8 +143,7 @@ path1 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file3.yaml'
 path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file4.yml'
 data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
-#print(generate_diff(path1, path2))
+# print(generate_diff(path1, path2))
 diff = (generate_diff_tree(data1, data2))
 print(format_diff(diff))
-#print(diff)
-
+# print(diff)
