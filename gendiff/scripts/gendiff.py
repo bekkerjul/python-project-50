@@ -41,11 +41,15 @@ def define_format(path):
 
 def stringify_value(key, val, sign, indent):
     if isinstance(val, dict):
-        key2 = list(val)[0]
-        return (f'{indent}  {sign} {key}: {{\n{indent}        '
-                f'{key2}: {val[key2]}\n{indent}    }}\n ')
+        items = []
+        for subkey, subval in val.items():
+            items.append(stringify_value(subkey, subval, ' ', indent + '    '))
+        return f"{indent}  {sign} {key}: {{\n{''.join(items)}{indent}    }}\n"
+    elif isinstance(val, list):
+        items = [stringify_value("", item, ' ', indent + '    ') for item in val]
+        return f"{indent}  {sign} {key}: [\n{''.join(items)}{indent}    ]\n"
     else:
-        return f'{indent}  {sign} {key}: {val}\n'
+        return f"{indent}  {sign} {key}: {val}\n"
 
 
 def format_diff(diff, depth=0):
@@ -65,41 +69,6 @@ def format_diff(diff, depth=0):
             diff_str += f'{stringify_value(key, val["value"][1], "+", indent)}'
     diff_str += f'{indent}}}'
     return diff_str
-
-
-"""
-   for key, val in diff.items():
-     if isinstance(val, dict) and key != 'type':
-         format_diff(val, depth+1)
-
-     if val['type'] == 'added':
-         diff_str += f'{indent}+ {key}: {val["value"]}\n'
-     elif val['type'] == 'removed':
-         diff_str += f'{indent}+ {key}: {val["value"]}\n'
-     elif val['type'] == 'changed':
-         diff_str += f'{indent}- {key}: {val["value"]}\n'
-         diff_str += f'{indent}+ {key}: {val["value"]}\n'
-     else:
-         diff_str += f'{indent}  {key}: {val["value"]}\n'
- return diff_str
-
-
-
-
-depth += 1
-            diff_str += '{\n'
-            format_diff(val['first_file'], depth, diff_str)
-        if val['type'] == 'added':
-            diff_str += f'{"  " * (depth - 2)}- {key}: {val["first_file"]}\n'
-        elif val['type'] == 'removed':
-            diff_str += f'{"  " * (depth - 2)}+ {key}: {val["second_file"]}\n'
-        elif val['type'] == 'changed':
-            diff_str += f'{"  " * (depth - 2)}- {key}: {val["first_file"]}\n'
-            diff_str += f'{"  " * (depth - 2)}+ {key}: {val["second_file"]}\n'
-        else:
-            diff_str += f'{"  " * depth}{key}: {val["first_file"]}\n'
-    return diff_str
-"""
 
 
 def generate_diff_tree(data1, data2):
