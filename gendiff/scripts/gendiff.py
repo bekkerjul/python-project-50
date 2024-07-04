@@ -1,8 +1,6 @@
 import json
 import yaml
-
-
-# from gendiff.parser import make_parser
+from gendiff.parser import make_parser
 
 
 def load_format(path, format_method):
@@ -100,7 +98,7 @@ def generate_diff(path1, path2):
     return format_diff(diff)
 
 
-"""
+
 def main():
     make_parser(generate_diff)
 
@@ -116,3 +114,4 @@ data2 = load_format(path2, yaml.safe_load)
 diff = (generate_diff_tree(data1, data2))
 print(format_diff(diff))
 # print(diff)
+"""
