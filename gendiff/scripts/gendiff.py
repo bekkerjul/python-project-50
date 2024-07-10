@@ -50,7 +50,7 @@ def stringify_value(key, val, sign, indent):
         return f"{indent}  {sign} {key}: {val}\n"
 
 
-def format_diff(diff, depth=0):
+def stylish(diff, depth=0):
     diff_str = '{\n'
     indent = '    ' * depth
     for key, val in diff.items():
@@ -61,7 +61,7 @@ def format_diff(diff, depth=0):
         elif val['type'] == 'unchanged':
             diff_str += f'{indent}    {key}: {val["value"]}\n'
         elif val['type'] == 'nested':
-            diff_str += f'{indent}    {key}: {format_diff(val["value"], depth + 1)}\n'
+            diff_str += f'{indent}    {key}: {format_diff(val["value"],depth + 1)}\n'.rstrip()
         else:
             diff_str += f'{stringify_value(key, val["value"][0], "-", indent)}'
             diff_str += f'{stringify_value(key, val["value"][1], "+", indent)}'
@@ -90,12 +90,12 @@ def generate_diff_tree(data1, data2):
     return diff
 
 
-def generate_diff(path1, path2):
+def generate_diff(path1, path2, formatter=stylish):
     data1 = load_format(path1, define_format(path1))
     data2 = load_format(path2, define_format(path2))
 
     diff = generate_diff_tree(data1, data2)
-    return format_diff(diff)
+    return formatter(diff)
 
 
 
