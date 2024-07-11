@@ -61,7 +61,7 @@ def stylish(diff, depth=0):
         elif val['type'] == 'unchanged':
             diff_str += f'{indent}    {key}: {val["value"]}\n'
         elif val['type'] == 'nested':
-            diff_str += f'{indent}    {key}: {format_diff(val["value"],depth + 1)}\n'.rstrip()
+            diff_str += f'{indent}    {key}: {stylish(val["value"],depth + 1)}\n'.rstrip()
         else:
             diff_str += f'{stringify_value(key, val["value"][0], "-", indent)}'
             diff_str += f'{stringify_value(key, val["value"][1], "+", indent)}'
