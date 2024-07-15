@@ -1,6 +1,6 @@
 import json
 import yaml
-from gendiff.parser import make_parser
+#from gendiff.parser import make_parser
 
 
 def load_format(path, format_method):
@@ -69,6 +69,21 @@ def stylish(diff, depth=0):
     return diff_str
 
 
+def plain(diff, path = ''):
+    diff_str = 'Property '
+    for key, value in diff.items():
+        path += key
+        if value['type'] == 'removed':
+            diff_str += f"'{path}' was removed\n"
+        elif value['type'] == 'added':
+            diff_str += f"'{path}' was added with value: '{value[value]}'\n"
+        elif value['type'] == 'unchanged':
+            continue
+        elif value['type'] == 'nested':
+            path += plain(value["value"], path+=f'{key}.')
+        else:
+            diff_str += f"'{path}' was updated. From {value['value'][0]} to {value['value'][1]}\n"
+
 def generate_diff_tree(data1, data2):
     diff = {}
     all_keys = compare_keys(data1, data2)
@@ -98,7 +113,7 @@ def generate_diff(path1, path2, formatter=stylish):
     return formatter(diff)
 
 
-
+""""
 def main():
     make_parser(generate_diff)
 
@@ -106,12 +121,11 @@ def main():
 if __name__ == '__main__':
     main()
 """
-path1 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file3.yaml'
-path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/file4.yml'
+path1 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/fixtures_yaml/file3.yaml'
+path2 = 'C:/Users/Юля/Documents/python-project-50/tests/fixtures/fixtures_yaml/file4.yml'
 data1 = load_format(path1, yaml.safe_load)
 data2 = load_format(path2, yaml.safe_load)
 # print(generate_diff(path1, path2))
 diff = (generate_diff_tree(data1, data2))
-print(format_diff(diff))
-# print(diff)
-"""
+#print(format_diff(diff))
+print(diff)
