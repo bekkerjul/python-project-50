@@ -1,6 +1,8 @@
 import json
 import yaml
-#from gendiff.parser import make_parser
+from gendiff.scripts.formatters.plain import plain
+from gendiff.scripts.formatters.stylish import stylish
+from gendiff.parser import make_parser
 
 
 def load_format(path, format_method):
@@ -37,53 +39,6 @@ def define_format(path):
     return make_format
 
 
-def stringify_value(key, val, sign, indent):
-    if isinstance(val, dict):
-        items = []
-        for subkey, subval in val.items():
-            items.append(stringify_value(subkey, subval, ' ', indent + '    '))
-        return f"{indent}  {sign} {key}: {{\n{''.join(items)}{indent}    }}\n"
-    elif isinstance(val, list):
-        items = [stringify_value("", item, ' ', indent + '    ') for item in val]
-        return f"{indent}  {sign} {key}: [\n{''.join(items)}{indent}    ]\n"
-    else:
-        return f"{indent}  {sign} {key}: {val}\n"
-
-
-def stylish(diff, depth=0):
-    diff_str = '{\n'
-    indent = '    ' * depth
-    for key, val in diff.items():
-        if val['type'] == 'removed':
-            diff_str += f'{stringify_value(key, val["value"], "-", indent)}'
-        elif val['type'] == 'added':
-            diff_str += f'{stringify_value(key, val["value"], "+", indent)}'
-        elif val['type'] == 'unchanged':
-            diff_str += f'{indent}    {key}: {val["value"]}\n'
-        elif val['type'] == 'nested':
-            diff_str += f'{indent}    {key}: {stylish(val["value"],depth + 1)}\n'.rstrip()
-        else:
-            diff_str += f'{stringify_value(key, val["value"][0], "-", indent)}'
-            diff_str += f'{stringify_value(key, val["value"][1], "+", indent)}'
-    diff_str += f'{indent}}}'
-    return diff_str
-
-
-def plain(diff, path = ''):
-    diff_str = 'Property '
-    for key, value in diff.items():
-        path += key
-        if value['type'] == 'removed':
-            diff_str += f"'{path}' was removed\n"
-        elif value['type'] == 'added':
-            diff_str += f"'{path}' was added with value: '{value[value]}'\n"
-        elif value['type'] == 'unchanged':
-            continue
-        elif value['type'] == 'nested':
-            path += plain(value["value"], path+=f'{key}.')
-        else:
-            diff_str += f"'{path}' was updated. From {value['value'][0]} to {value['value'][1]}\n"
-
 def generate_diff_tree(data1, data2):
     diff = {}
     all_keys = compare_keys(data1, data2)
@@ -108,14 +63,25 @@ def generate_diff_tree(data1, data2):
 def generate_diff(path1, path2, formatter=stylish):
     data1 = load_format(path1, define_format(path1))
     data2 = load_format(path2, define_format(path2))
-
+    print('to generate diff tree')
     diff = generate_diff_tree(data1, data2)
-    return formatter(diff)
+    print(diff)
+    return stylish(diff)
 
 
-""""
 def main():
-    make_parser(generate_diff)
+    parser = make_parser(generate_diff)
+    print(parser)
+    args = parser.parse_args()
+    formatters = {
+        'stylish': stylish,
+        'plain': plain
+    }
+    formatter = formatters.get(args.format, stylish)
+    diff = generate_diff(args.first_file, args.second_file, formatter)
+    print(diff)
+    with open('result.txt', 'w', encoding='UTF8') as text:
+        text.write(diff)
 
 
 if __name__ == '__main__':
@@ -129,3 +95,4 @@ data2 = load_format(path2, yaml.safe_load)
 diff = (generate_diff_tree(data1, data2))
 #print(format_diff(diff))
 print(diff)
+"""
